@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
+use App\Jobs\SendEmailJob;
 
 class JWTController extends Controller
 {
@@ -44,6 +45,9 @@ class JWTController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make($request->password)
             ]);
+
+        $details['email'] = $request->email;
+        dispatch(new SendEmailJob($details));
 
         return response()->json([
             'message' => 'User successfully registered'

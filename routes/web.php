@@ -28,7 +28,6 @@ Route::get('/', function () {
 
 Route::group(['middleware' => 'jwt.auth'], function($router) {
 
-    //PRODUCT
     Route::post('/order', [ProductController::class, 'order']);
     
 });
