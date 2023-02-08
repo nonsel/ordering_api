@@ -62,6 +62,9 @@ class JWTController extends Controller
     public function login(Request $request)
     {
 
+        if ( RateLimiter::tooManyAttempts($request['email'],5)) {
+            return response()->json(['error' => 'Too many login attempt please wait for 5 mins'], 401);;
+        }
 
         $credentials = [
             'email' => $request['email'],
@@ -70,14 +73,11 @@ class JWTController extends Controller
         
         if (!$token = auth()->attempt($credentials)) {
 
-            $a = RateLimiter::hit($request->email,10);
-
-            if($a>5){
-                return response()->json(['error' => '5 failed attempts account locking for 5 minutes'], 401);
-            }
-
+            RateLimiter::hit($request['email'], $seconds = 300);
             return response()->json(['error' => 'Invalid credentials'], 401);
         }
+
+        RateLimiter::clear($request['email']);
 
         return $this->respondWithToken($token);
     }
